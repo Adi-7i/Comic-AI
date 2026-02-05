@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.db import init_db
-from app.api.v1.routes import auth, projects, scenes, story, generation
+from app.api.v1.routes import auth, projects, scenes, story, generation, delivery
 
 
 
@@ -60,6 +60,7 @@ app.include_router(projects.router, prefix="/api/v1")
 app.include_router(scenes.router, prefix="/api/v1")
 app.include_router(story.router, prefix="/api/v1")
 app.include_router(generation.router, prefix="/api/v1")
+app.include_router(delivery.router, prefix="/api/v1/projects", tags=["PDF Delivery"])  # Step-7
 
 
 # Root endpoint

@@ -283,11 +283,88 @@ class AzureBlobUploadFailed(HTTPException):
 
 class InvalidSceneStructure(HTTPException):
     """
-    Raised when scene data doesn't match expected structure for generation.
+    Raised when scene structure is invalid for image generation.
     HTTP 400 Bad Request.
     """
-    def __init__(self, detail: str = "Invalid scene structure for image generation"):
+    def __init__(self, detail: str = "Invalid scene structure"):
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
+            detail=detail,
+        )
+
+
+# ============================================================================
+# PDF COMPILATION EXCEPTIONS (Step-7)
+# ============================================================================
+
+
+class PdfGenerationFailed(HTTPException):
+    """
+    Raised when PDF compilation fails.
+    HTTP 500 Internal Server Error.
+    """
+    def __init__(self, detail: str = "PDF generation failed"):
+        super().__init__(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=detail,
+        )
+
+
+class PdfAlreadyExists(HTTPException):
+    """
+    Raised when PDF already exists for the project.
+    HTTP 409 Conflict.
+    """
+    def __init__(self, detail: str = "PDF already exists for this project"):
+        super().__init__(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=detail,
+        )
+
+
+class ProjectNotCompleted(HTTPException):
+    """
+    Raised when trying to generate PDF for incomplete project.
+    HTTP 400 Bad Request.
+    """
+    def __init__(self, detail: str = "Project must be completed before PDF generation"):
+        super().__init__(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=detail,
+        )
+
+
+class AssetMissing(HTTPException):
+    """
+    Raised when required comic page assets are not found.
+    HTTP 404 Not Found.
+    """
+    def __init__(self, detail: str = "Required comic page assets not found"):
+        super().__init__(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=detail,
+        )
+
+
+class DownloadNotAllowed(HTTPException):
+    """
+    Raised when download is not permitted (plan restriction).
+    HTTP 403 Forbidden.
+    """
+    def __init__(self, detail: str = "Download not allowed"):
+        super().__init__(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=detail,
+        )
+
+
+class PlanPdfAccessDenied(HTTPException):
+    """
+    Raised when user's plan doesn't allow PDF generation with current page count.
+    HTTP 403 Forbidden.
+    """
+    def __init__(self, detail: str = "Your plan does not allow this PDF generation"):
+        super().__init__(
+            status_code=status.HTTP_403_FORBIDDEN,
             detail=detail,
         )

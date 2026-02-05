@@ -262,3 +262,120 @@ def image_generation_task(self, generation_id: str):
             raise  # Re-raise for Celery retry logic
 
     run_async(_process())
+
+
+@celery.task(
+    bind=True,
+    name="app.workers.tasks.pdf_compilation_task",
+    autoretry_for=(ConnectionError, TimeoutError),
+    retry_backoff=True,
+    retry_kwargs={"max_retries": 2}
+)
+def pdf_compilation_task(self, project_id: str, user_id: str):
+    """
+    PDF Compilation Task - Compiles comic images into downloadable PDF.
+    
+    Steps:
+    1. Load Project + User (5%)
+    2. Validate completion & plan rules (10%)
+    3. Load ComicAssets (20%)
+    4. Download images from Blob (40%)
+    5. Compile PDF (60%)
+    6. Upload to Blob (80%)
+    7. Create PdfAsset record (90-100%)
+    
+    Hard fails on:
+    - Project not completed
+    - Plan violation
+    - Missing assets
+    """
+    async def _process():
+        # Import here to avoid circular imports
+        from app.models.project import Project
+        from app.models.user import User
+        from app.services.pdf_service import pdf_service
+        from app.core.exceptions import (
+            ProjectNotCompleted,
+            AssetMissing,
+            PlanPdfAccessDenied,
+            PdfGenerationFailed
+        )
+        
+        # Initialize DB
+        await init_db()
+        
+        task_id = self.request.id
+        logger.info(f"Starting PDF compilation: task_id={task_id}, project={project_id}")
+        
+        try:
+            await task_service.update_progress(task_id, 5)
+            
+            # 1. Load Project
+            project = await Project.get(PydanticObjectId(project_id))
+            if not project:
+                raise ValueError(f"Project {project_id} not found")
+            
+            # 2. Load User
+            user = await User.get(PydanticObjectId(user_id))
+            if not user:
+                raise ValueError(f"User {user_id} not found")
+            
+            await task_service.update_progress(task_id, 10)
+            
+            # =====================================================
+            # VALIDATION
+            # =====================================================
+            
+            # Validate project completion & assets
+            await pdf_service.validate_compilation(project)
+            
+            # Enforce plan rules
+            await pdf_service.enforce_plan_rules(project)
+            
+            await task_service.update_progress(task_id, 20)
+            
+            # =====================================================
+            # COMPILE PDF
+            # =====================================================
+            
+            # Main compilation (handles download, build, upload)
+            # Progress updates happen inside pdf_service
+            pdf_asset = await pdf_service.compile_pdf(project, user)
+            
+            await task_service.update_progress(task_id, 100)
+            
+            # =====================================================
+            # COMPLETE
+            # =====================================================
+            
+            await task_service.mark_completed(task_id, result={
+                "pdf_asset_id": str(pdf_asset.id),
+                "file_size_mb": pdf_asset.file_size_mb,
+                "page_count": pdf_asset.page_count,
+                "resolution_dpi": pdf_asset.resolution_dpi
+            })
+            
+            logger.info(f"PDF compilation completed: {pdf_asset.file_size_mb}MB, {pdf_asset.page_count} pages")
+            
+        except (ProjectNotCompleted, AssetMissing, PlanPdfAccessDenied) as e:
+            # Hard failures - don't retry
+            logger.error(f"PDF validation error: {e.detail}")
+            await task_service.mark_failed(task_id, e.detail)
+            # Don't re-raise - we've handled it
+            
+        except PdfGenerationFailed as e:
+            # Generation error - log and fail
+            logger.error(f"PDF generation failed: {e.detail}")
+            await task_service.mark_failed(task_id, e.detail)
+            
+        except Exception as e:
+            # Other errors - mark failed and potentially retry
+            error_msg = str(e)
+            if len(error_msg) > 500:
+                error_msg = error_msg[:497] + "..."
+            
+            logger.error(f"PDF compilation failed: {error_msg}")
+            await task_service.mark_failed(task_id, error_msg)
+            raise  # Re-raise for Celery retry logic
+
+    run_async(_process())

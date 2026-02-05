@@ -28,3 +28,6 @@ asgiref>=3.7.0                      # Async-Sync utilities
 # Azure Services (Step-6: Image Generation)
 azure-storage-blob>=12.19.0         # Azure Blob Storage
 Pillow>=10.0.0                      # Image processing & watermarking
+
+# PDF Generation (Step-7: PDF Compilation)
+reportlab>=4.0.0                    # PDF creation library

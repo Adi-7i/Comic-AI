@@ -19,6 +19,7 @@ from app.models.generation import Generation
 from app.models.payment import Payment
 from app.models.audit_log import AuditLog
 from app.models.comic_asset import ComicAsset  # Step-6: Image Generation
+from app.models.pdf_asset import PdfAsset      # Step-7: PDF Compilation
 
 
 from app.core.config import settings
@@ -70,11 +71,12 @@ async def init_db() -> AsyncIOMotorClient:
             Payment,
             AuditLog,
             ComicAsset,  # Step-6: Image Generation
+            PdfAsset,    # Step-7: PDF Compilation
         ],
     )
     
     print(f"✅ Database initialized: {DATABASE_NAME}")
-    print(f"📊 Collections: users, projects, characters, scenes, generations, payments, audit_logs, comic_assets")
+    print(f"📊 Collections: users, projects, characters, scenes, generations, payments, audit_logs, comic_assets, pdf_assets")
     
     return client
 

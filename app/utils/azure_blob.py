@@ -168,6 +168,40 @@ class AzureBlobService:
         Format: projects/{project_id}/pages/{page_no}.png
         """
         return f"projects/{project_id}/pages/{page_no}.png"
+    
+    # ========================================================================
+    # PDF-SPECIFIC METHODS (Step-7)
+    # ========================================================================
+    
+    async def upload_pdf(
+        self,
+        pdf_bytes: bytes,
+        blob_path: str
+    ) -> Optional[str]:
+        """
+        Upload PDF to Azure Blob Storage.
+        
+        Args:
+            pdf_bytes: PDF data as bytes
+            blob_path: Path within container (e.g., "pdfs/{project_id}/comic.pdf")
+            
+        Returns:
+            Blob path if successful, None if failed
+        """
+        return await self.upload_image(
+            image_bytes=pdf_bytes,
+            blob_path=blob_path,
+            content_type="application/pdf"
+        )
+    
+    @staticmethod
+    def build_pdf_blob_path(project_id: str) -> str:
+        """
+        Build standard blob path for a project PDF.
+        
+        Format: pdfs/{project_id}/comic.pdf
+        """
+        return f"pdfs/{project_id}/comic.pdf"
 
 
 # Singleton instance
