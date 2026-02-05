@@ -204,3 +204,90 @@ class TaskAlreadyRunning(HTTPException):
             detail=detail,
         )
 
+
+# ============================================================================
+# Image Generation Exceptions (Step-6)
+# ============================================================================
+
+class AzureImageApiKeyMissing(HTTPException):
+    """
+    Raised when Azure Image API key is not configured.
+    HTTP 500 Internal Server Error (Server Misconfiguration).
+    """
+    def __init__(self, detail: str = "Azure Image API key is not configured"):
+        super().__init__(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=detail,
+        )
+
+
+class AzureImageProviderError(HTTPException):
+    """
+    Raised when the Azure Image API returns an error (network, 5xx, rate limit).
+    HTTP 502 Bad Gateway.
+    """
+    def __init__(self, detail: str = "Azure Image generation service error"):
+        super().__init__(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=detail,
+        )
+
+
+class ImageGenerationFailed(HTTPException):
+    """
+    Raised when image generation fails after retries.
+    HTTP 500 Internal Server Error.
+    """
+    def __init__(self, detail: str = "Image generation failed"):
+        super().__init__(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=detail,
+        )
+
+
+class PlanImageAccessDenied(HTTPException):
+    """
+    Raised when user's plan doesn't allow image generation.
+    HTTP 403 Forbidden.
+    """
+    def __init__(self, detail: str = "Your plan does not allow image generation"):
+        super().__init__(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=detail,
+        )
+
+
+class FreeStoryAlreadyUsed(HTTPException):
+    """
+    Raised when FREE plan user has already used their one-time story.
+    HTTP 403 Forbidden.
+    """
+    def __init__(self, detail: str = "Your free story has already been used"):
+        super().__init__(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=detail,
+        )
+
+
+class AzureBlobUploadFailed(HTTPException):
+    """
+    Raised when image upload to Azure Blob Storage fails.
+    HTTP 500 Internal Server Error.
+    """
+    def __init__(self, detail: str = "Failed to upload image to storage"):
+        super().__init__(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=detail,
+        )
+
+
+class InvalidSceneStructure(HTTPException):
+    """
+    Raised when scene data doesn't match expected structure for generation.
+    HTTP 400 Bad Request.
+    """
+    def __init__(self, detail: str = "Invalid scene structure for image generation"):
+        super().__init__(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=detail,
+        )

@@ -5,6 +5,7 @@ Handles MongoDB connection and Beanie ODM initialization.
 """
 
 import os
+import ssl
 from typing import Optional
 
 from beanie import init_beanie
@@ -17,6 +18,7 @@ from app.models.scene import Scene
 from app.models.generation import Generation
 from app.models.payment import Payment
 from app.models.audit_log import AuditLog
+from app.models.comic_asset import ComicAsset  # Step-6: Image Generation
 
 
 from app.core.config import settings
@@ -43,8 +45,15 @@ async def init_db() -> AsyncIOMotorClient:
         async def startup_event():
             await init_db()
     """
-    # Create Motor async client
-    client = AsyncIOMotorClient(MONGODB_URL)
+    # Create Motor async client with SSL certificate bypass for development
+    # For production, use proper certificate validation
+    client = AsyncIOMotorClient(
+        MONGODB_URL,
+        tlsAllowInvalidCertificates=True,
+        serverSelectionTimeoutMS=30000,
+        connectTimeoutMS=30000,
+        socketTimeoutMS=30000,
+    )
     
     # Get database
     database = client[DATABASE_NAME]
@@ -60,11 +69,12 @@ async def init_db() -> AsyncIOMotorClient:
             Generation,
             Payment,
             AuditLog,
+            ComicAsset,  # Step-6: Image Generation
         ],
     )
     
     print(f"✅ Database initialized: {DATABASE_NAME}")
-    print(f"📊 Collections: users, projects, characters, scenes, generations, payments, audit_logs")
+    print(f"📊 Collections: users, projects, characters, scenes, generations, payments, audit_logs, comic_assets")
     
     return client
 
@@ -103,7 +113,11 @@ async def health_check() -> bool:
             return {"status": "healthy" if db_healthy else "unhealthy"}
     """
     try:
-        client = AsyncIOMotorClient(MONGODB_URL, serverSelectionTimeoutMS=5000)
+        client = AsyncIOMotorClient(
+            MONGODB_URL,
+            tlsAllowInvalidCertificates=True,
+            serverSelectionTimeoutMS=5000
+        )
         await client.admin.command('ping')
         client.close()
         return True

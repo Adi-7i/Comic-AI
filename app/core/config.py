@@ -57,6 +57,14 @@ class Settings(BaseSettings):
     # CORS (for frontend integration)
     CORS_ORIGINS: list = ["http://localhost:3000", "http://localhost:8000"]
     
+    # Azure Blob Storage (for comic assets)
+    AZURE_BLOB_CONNECTION_STRING: Optional[str] = None
+    AZURE_BLOB_CONTAINER_NAME: str = "comic-assets"
+    BLOB_SAS_EXPIRY_HOURS: int = 24
+    
+    # Free Plan Demo Feature
+    FREE_STORY_ENABLED: bool = True
+    
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

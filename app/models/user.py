@@ -63,6 +63,16 @@ class User(BaseDocument):
         description="Timestamp of last successful login"
     )
     
+    # FREE Plan Demo (one-time story generation)
+    free_story_available: bool = Field(
+        default=True,
+        description="Whether user can use their one-time free story (FREE plan only)"
+    )
+    free_story_used: bool = Field(
+        default=False,
+        description="Whether user has used their free story (atomic update)"
+    )
+    
     class Settings:
         name = "users"
         
