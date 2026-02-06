@@ -70,13 +70,17 @@ class PaymentStatus(str, Enum):
     """
     Payment transaction status.
     
-    - PENDING: Payment initiated but not confirmed
-    - COMPLETED: Payment successfully processed and verified
-    - FAILED: Payment failed (declined card, insufficient funds, etc.)
+    - CREATED: Razorpay order created, awaiting payment
+    - PENDING: Payment initiated but not confirmed  
+    - SUCCESS: Payment captured and verified (Razorpay)
+    - COMPLETED: Payment successfully processed (legacy)
+    - FAILED: Payment failed (declined, insufficient funds, etc.)
     - REFUNDED: Payment refunded to customer
     """
+    CREATED = "created"      # Step-8: Razorpay order created
     PENDING = "pending"
-    COMPLETED = "completed"
+    SUCCESS = "success"      # Step-8: Razorpay payment captured
+    COMPLETED = "completed"  # Legacy/generic success
     FAILED = "failed"
     REFUNDED = "refunded"
 

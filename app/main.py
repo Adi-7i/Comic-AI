@@ -10,7 +10,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.db import init_db
-from app.api.v1.routes import auth, projects, scenes, story, generation, delivery
+from app.api.v1.routes import auth, projects, scenes, story, generation, delivery, payments
+from app.api.v1.webhooks import razorpay as razorpay_webhook
 
 
 
@@ -61,6 +62,8 @@ app.include_router(scenes.router, prefix="/api/v1")
 app.include_router(story.router, prefix="/api/v1")
 app.include_router(generation.router, prefix="/api/v1")
 app.include_router(delivery.router, prefix="/api/v1/projects", tags=["PDF Delivery"])  # Step-7
+app.include_router(payments.router, prefix="/api/v1/payments", tags=["Payments"])  # Step-8
+app.include_router(razorpay_webhook.router, prefix="/api/v1/webhooks/razorpay", tags=["Webhooks"])  # Step-8
 
 
 # Root endpoint

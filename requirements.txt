@@ -29,5 +29,12 @@ asgiref>=3.7.0                      # Async-Sync utilities
 azure-storage-blob>=12.19.0         # Azure Blob Storage
 Pillow>=10.0.0                      # Image processing & watermarking
 
-# PDF Generation (Step-7: PDF Compilation)
+# PDF Generation (Step-7)
 reportlab>=4.0.0                    # PDF creation library
+
+# Payment Processing (Step-8)
+razorpay>=1.4.0
+
+# Development
+pytest>=7.0.0
+pytest-asyncio>=0.21.0

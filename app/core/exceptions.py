@@ -368,3 +368,61 @@ class PlanPdfAccessDenied(HTTPException):
             status_code=status.HTTP_403_FORBIDDEN,
             detail=detail,
         )
+
+
+# ============================================================================
+# PAYMENT EXCEPTIONS (Step-8: Razorpay Integration)
+# ============================================================================
+
+class PaymentOrderCreateFailed(HTTPException):
+    """Failed to create Razorpay order."""
+    def __init__(self, detail: str = "Failed to create payment order"):
+        super().__init__(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=detail
+        )
+
+
+class PaymentSignatureInvalid(HTTPException):
+    """Webhook signature verification failed."""
+    def __init__(self, detail: str = "Invalid payment signature"):
+        super().__init__(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=detail
+        )
+
+
+class PaymentAlreadyProcessed(HTTPException):
+    """Payment already processed (idempotency check)."""
+    def __init__(self, detail: str = "Payment already processed"):
+        super().__init__(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=detail
+        )
+
+
+class PaymentFailed(HTTPException):
+    """Payment failed or declined."""
+    def __init__(self, detail: str = "Payment failed"):
+        super().__init__(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=detail
+        )
+
+
+class PlanUpgradeFailed(HTTPException):
+    """Failed to upgrade user plan."""
+    def __init__(self, detail: str = "Plan upgrade failed"):
+        super().__init__(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=detail
+        )
+
+
+class InvalidPlanRequested(HTTPException):
+    """Requested plan is invalid or not purchasable."""
+    def __init__(self, detail: str = "Invalid plan requested"):
+        super().__init__(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=detail
+        )
