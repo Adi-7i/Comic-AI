@@ -4,17 +4,35 @@ import { ProfileCard } from "@/components/profile/profile-card";
 import { UsageCard } from "@/components/profile/usage-card";
 import { ProfileSkeleton } from "@/components/ui/skeletons";
 import { useState, useEffect } from "react";
+import { authApi } from "@/lib/api/auth";
+import { profileApi } from "@/lib/api/profile";
+import { User, Usage } from "@/lib/types/api";
 
 export default function ProfilePage() {
     const [isLoading, setIsLoading] = useState(true);
+    const [user, setUser] = useState<User | null>(null);
+    const [usage, setUsage] = useState<Usage | null>(null);
 
     useEffect(() => {
-        // Simulate loading delight
-        const timer = setTimeout(() => setIsLoading(false), 800);
-        return () => clearTimeout(timer);
+        const loadData = async () => {
+            try {
+                const [userData, usageData] = await Promise.all([
+                    authApi.getUserProfile(),
+                    profileApi.getUsage()
+                ]);
+                setUser(userData);
+                setUsage(usageData);
+            } catch (error) {
+                console.error("Failed to load profile data", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadData();
     }, []);
 
-    if (isLoading) {
+    if (isLoading || !user || !usage) {
         return <ProfileSkeleton />;
     }
 
@@ -28,19 +46,14 @@ export default function ProfilePage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="md:col-span-2">
                     <ProfileCard
-                        name="Alex Chen"
-                        email="alex.chen@example.com"
-                        plan="Pro"
+                        name={user.name}
+                        email={user.email}
+                        plan={user.plan}
                     />
                 </div>
                 <div>
                     <UsageCard
-                        plan="Pro"
-                        usage={{
-                            comicsCreated: 12,
-                            comicsLimit: 50,
-                            pagesGenerated: 48
-                        }}
+                        usage={usage}
                     />
                 </div>
             </div>

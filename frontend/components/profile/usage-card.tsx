@@ -3,10 +3,8 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Zap, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { PlanType } from "@/lib/store/wizard-store";
 
 interface UsageCardProps {
-    plan: PlanType;
     usage: {
         comicsCreated: number;
         comicsLimit: number;

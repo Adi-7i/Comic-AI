@@ -5,49 +5,68 @@ import { ProgressView } from "./progress-view";
 import { SuccessView } from "./success-view";
 import { ErrorView } from "./error-view";
 import { useEffect } from "react";
+import { generationApi } from "@/lib/api/generation";
 
 export function GenerationView() {
-    const { generationStatus, setGenerationStatus, progress, setProgress, setGenerationStep } = useWizardStore();
+    const { generationStatus, setGenerationStatus, setProgress, setGenerationStep } = useWizardStore();
 
-    // Simulation Logic
+    // Generation Logic
     useEffect(() => {
         if (generationStatus === "processing") {
-            let currentProgress = progress; // Use store progress
-            const interval = setInterval(() => {
-                currentProgress += Math.random() * 5;
-                if (currentProgress > 100) currentProgress = 100;
+            let mounted = true;
 
-                setProgress(currentProgress);
+            const generate = async () => {
+                try {
+                    // Simulate step updates for delight
+                    setGenerationStep("parsing");
+                    setProgress(10);
+                    await new Promise(r => setTimeout(r, 800));
 
-                // Update steps based on progress
-                if (currentProgress < 20) setGenerationStep("parsing");
-                else if (currentProgress < 50) setGenerationStep("scenes");
-                else if (currentProgress < 85) setGenerationStep("generating");
-                else setGenerationStep("finalizing");
+                    if (!mounted) return;
+                    setGenerationStep("scenes");
+                    setProgress(40);
+                    await new Promise(r => setTimeout(r, 800));
 
-                if (currentProgress >= 100) {
-                    clearInterval(interval);
+                    if (!mounted) return;
+                    setGenerationStep("generating");
+                    setProgress(70);
+
+                    // Call API (Mock or Real)
+                    await generationApi.generateComic("prompt placeholder", "Pro");
+
+                    if (!mounted) return;
+                    setGenerationStep("finalizing");
+                    setProgress(100);
+
                     setTimeout(() => {
-                        // Randomly fail for testing? No, users hate that. Success!
-                        setGenerationStatus("success");
-                    }, 1000);
+                        if (mounted) setGenerationStatus("success");
+                    }, 500);
+
+                } catch (err) {
+                    console.error("Generation failed", err);
+                    if (mounted) {
+                        setGenerationStatus("failed");
+                        // setError(err.message);
+                    }
                 }
-            }, 500);
+            };
+
+            generate();
 
             const handleBeforeUnload = (e: BeforeUnloadEvent) => {
                 e.preventDefault();
-                e.returnValue = ""; // Standard for Chrome
+                e.returnValue = "";
                 return "";
             };
 
             window.addEventListener("beforeunload", handleBeforeUnload);
 
             return () => {
-                clearInterval(interval);
+                mounted = false;
                 window.removeEventListener("beforeunload", handleBeforeUnload);
             };
         }
-    }, [generationStatus, setProgress, setGenerationStep, setGenerationStatus, progress]);
+    }, [generationStatus, setProgress, setGenerationStep, setGenerationStatus]);
 
     return (
         <>
