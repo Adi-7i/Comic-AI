@@ -1,39 +1,25 @@
-"use client"
-
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { useAuthStore } from "@/lib/store/auth-store"
+import Header from "@/components/dashboard/header";
+import { Sidebar } from "@/components/dashboard/sidebar";
 
 export default function ProtectedLayout({
     children,
 }: {
-    children: React.ReactNode
+    children: React.ReactNode;
 }) {
-    const router = useRouter()
-    const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
-    const [isMounted, setIsMounted] = useState(false)
-
-    useEffect(() => {
-        setIsMounted(true)
-    }, [])
-
-    useEffect(() => {
-        if (isMounted && !isAuthenticated) {
-            router.push("/login")
-        }
-    }, [isAuthenticated, isMounted, router])
-
-    // Prevent flash of protected content
-    if (!isMounted || !isAuthenticated) {
-        return null
-    }
-
     return (
-        <div className="flex min-h-screen flex-col">
-            {/* Re-use main navbar but we could eventually make a dashboard-specific one */}
-            <div className="flex-1 space-y-4 p-8 pt-6">
-                {children}
-            </div>
+        <div className="flex h-screen overflow-hidden bg-zinc-50 dark:bg-zinc-900">
+            {/* Desktop Sidebar */}
+            <aside className="hidden md:flex w-72 flex-col fixed inset-y-0 z-50">
+                <Sidebar />
+            </aside>
+
+            {/* Main Content Area */}
+            <main className="flex-1 md:ml-72 flex flex-col h-full overflow-hidden">
+                <Header />
+                <div className="flex-1 overflow-y-auto p-8">
+                    {children}
+                </div>
+            </main>
         </div>
-    )
+    );
 }
